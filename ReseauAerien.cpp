@@ -100,6 +100,74 @@ void ReseauAerien::resize(size_t p_nouvelleTaille)
     m_unReseau.resize(p_nouvelleTaille);
 }
 
+void ReseauAerien::relachementArc(size_t p_sommet1, size_t p_sommet2, int p_dureeCoutNiveau, std::vector<float>* p_coutChemin, std::vector<size_t>* p_sommetPrecedent) const
+{
+    float coutPotentiel;
+    if (p_dureeCoutNiveau == 1) {
+        coutPotentiel = (*p_coutChemin)[p_sommet1] +
+                        m_unReseau.getPonderationsArc(p_sommet1, p_sommet2).duree;
+    }
+    else if (p_dureeCoutNiveau == 2)
+    {
+        coutPotentiel = (*p_coutChemin)[p_sommet1] +
+                        m_unReseau.getPonderationsArc(p_sommet1, p_sommet2).cout;
+    }
+    else if (p_dureeCoutNiveau == 3)
+    {
+        coutPotentiel = (*p_coutChemin)[p_sommet1] +
+                        m_unReseau.getPonderationsArc(p_sommet1, p_sommet2).ns;
+    } else
+    {
+        throw std::logic_error("dureeCoutNiveau hors limite");
+    }
+
+    if (coutPotentiel < (*p_coutChemin)[p_sommet2])
+    {
+        (*p_coutChemin)[p_sommet2] = coutPotentiel;
+        (*p_sommetPrecedent)[p_sommet2] = p_sommet1;
+    }
+}
+
+Chemin ReseauAerien::determinerChemin(size_t p_origine, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const
+{
+    Chemin chemin;
+
+    chemin.reussi = true;
+
+    if (p_dureeCoutNiveau == 1)
+    {
+        chemin.dureeTotale = p_coutChemin[p_destination];
+    }
+    else if (p_dureeCoutNiveau == 2)
+    {
+        chemin.coutTotal = p_coutChemin[p_destination];
+    }
+    else
+    {
+        chemin.nsTotal = p_coutChemin[p_destination];
+    }
+
+    std::stack<std::string> villesChemin;
+    size_t predecesseur = p_destination;
+    villesChemin.push(m_unReseau.getNomSommet(p_destination));
+
+    do
+    {
+        predecesseur = p_sommetPrecedent[predecesseur];
+        villesChemin.push(m_unReseau.getNomSommet(predecesseur));
+    }
+    while (predecesseur != p_origine);
+
+    do
+    {
+        std::string& ville = villesChemin.top();
+        chemin.listeVilles.push_back(ville);
+        villesChemin.pop();
+    } while (!villesChemin.empty());
+
+    return chemin;
+}
+
 // Retourne le plus court chemin selon l'algorithme de Dijkstra
 // origine et destination font partie du graphe
 // Exception std::logic_error si origine et/ou destination absent du réseau
@@ -110,14 +178,15 @@ Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const
     {
         throw std::logic_error("L'origine et la destination doivent etre differents!");
     }
-    Chemin chemin = Chemin();
 
-    std::vector<float> coutChemin (m_unReseau.getNombreSommets(), std::numeric_limits<float>::max());
+    //Initialisation des variables utilisees dans l'algorithme
+    Chemin chemin = Chemin();
+    std::vector<float> coutChemin(m_unReseau.getNombreSommets(), std::numeric_limits<float>::max());
+    std::vector<size_t> sommetPrecedent(m_unReseau.getNombreSommets(), NIL);
+    std::list<size_t> sommetsRestants;
+
     coutChemin[m_unReseau.getNumeroSommet(p_origine)] = 0;
 
-    std::vector<size_t> sommetPrecedent (m_unReseau.getNombreSommets(), NIL);
-
-    std::list<size_t> sommetsRestants;
     for (size_t i = 0; i < m_unReseau.getNombreSommets(); i++)
     {
         sommetsRestants.push_back(i);
@@ -125,70 +194,38 @@ Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const
 
     for (int i = 0; i < m_unReseau.getNombreSommets(); i++)
     {
-        size_t sommetChoisi = ReseauAerien::minVecteur(coutChemin);
+        size_t sommetChoisi = ReseauAerien::minVecteur(coutChemin); //Choix du sommet ayant la plus petite valeur
         sommetsRestants.remove(sommetChoisi);
-        //chemin.listeVilles.push_back(m_unReseau.getNomSommet(sommetChoisi));
 
-        if (sommetChoisi == m_unReseau.getNumeroSommet(p_destination))
+        if (sommetChoisi == m_unReseau.getNumeroSommet(p_destination)) //Si on est rendus a la destination, on arrete et on remplis le chemin
         {
-            chemin.reussi = true;
-            if (p_dureeCout)
+            int dc = 1;
+            if (!p_dureeCout)
             {
-                chemin.dureeTotale = coutChemin[sommetChoisi];
-            } else
-            {
-                chemin.coutTotal = coutChemin[sommetChoisi];
+                dc = 2;
             }
-
-            std::stack<std::string> villesChemin;
-            size_t predecesseur = m_unReseau.getNumeroSommet(p_destination);
-            villesChemin.push(p_destination);
-
-            do
-            {
-                predecesseur = sommetPrecedent[predecesseur];
-                villesChemin.push(m_unReseau.getNomSommet(predecesseur));
-            }
-            while (predecesseur != m_unReseau.getNumeroSommet(p_origine));
-
-            do
-            {
-                std::string& ville = villesChemin.top();
-                chemin.listeVilles.push_back(ville);
-                villesChemin.pop();
-            } while (!villesChemin.empty());
-
+            chemin = determinerChemin(m_unReseau.getNumeroSommet(p_origine), m_unReseau.getNumeroSommet(p_destination), dc, coutChemin, sommetPrecedent);
             break;
         }
-
-        //Relachement des sommets adjacents
         std::vector<size_t> listeSommetsAdjacents = m_unReseau.listerSommetsAdjacents(sommetChoisi);
 
-        for (size_t i = 0; i < listeSommetsAdjacents.size(); i++)
+        for (size_t j = 0; j < listeSommetsAdjacents.size(); j++)
         {
-            if (ReseauAerien::sommetPresent(sommetsRestants, listeSommetsAdjacents[i]))
+            if (ReseauAerien::sommetPresent(sommetsRestants, listeSommetsAdjacents[j]))
             {
-                float coutPotentiel;
-                if (p_dureeCout)
+                int dc = 1;
+                if (!p_dureeCout)
                 {
-                    coutPotentiel = coutChemin[sommetChoisi] + m_unReseau.getPonderationsArc(sommetChoisi, listeSommetsAdjacents[i]).duree;
-                }
-                else
-                {
-                    coutPotentiel = coutChemin[sommetChoisi] + m_unReseau.getPonderationsArc(sommetChoisi, listeSommetsAdjacents[i]).cout;
-                }
-                if (coutPotentiel < coutChemin[listeSommetsAdjacents[i]])
-                {
-                    coutChemin[listeSommetsAdjacents[i]] = coutPotentiel;
-                    sommetPrecedent[listeSommetsAdjacents[i]] = sommetChoisi;
+                    dc = 2;
                 }
 
+                ReseauAerien::relachementArc(sommetChoisi, j, dc, &coutChemin, &sommetPrecedent);
             }
         }
-        listeSommetsAdjacents.clear();
-        coutChemin[sommetChoisi] = std::numeric_limits<float>::max();
 
+        coutChemin[sommetChoisi] = std::numeric_limits<float>::max(); //Pour eviter que ce sommet ne soit choisi de nouveau
     }
+
     return chemin;
 }
 
@@ -199,7 +236,49 @@ Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const
 // Exception std::logic_error si origine et/ou destination absent du réseau
 Chemin ReseauAerien::rechercheCheminBellManFord(const std::string &p_origine, const std::string &p_destination, int p_dureeCoutNiveau) const
 {
+    m_unReseau.sommetsExistent(m_unReseau.getNumeroSommet(p_origine), m_unReseau.getNumeroSommet(p_destination));
+    if (p_origine == p_destination)
+    {
+        throw std::logic_error("L'origine et la destination doivent etre differents!");
+    }
 
+    //Initialisation des variables utilisees dans l'algorithme
+    Chemin chemin = Chemin();
+    std::vector<float> coutChemin(m_unReseau.getNombreSommets(), std::numeric_limits<float>::max());
+    std::vector<size_t> sommetPrecedent(m_unReseau.getNombreSommets(), NIL);
+    std::list<size_t> sommetsRestants;
+
+    coutChemin[m_unReseau.getNumeroSommet(p_origine)] = 0;
+
+    for (int i = 0; i < m_unReseau.getNombreSommets() - 1; i++)
+    {
+        for (size_t j = 0; j < m_unReseau.getNombreSommets(); j++)
+        {
+            std::vector<size_t> listeSommetsAdjacents = m_unReseau.listerSommetsAdjacents(j);
+            for (size_t s = 0; s < listeSommetsAdjacents.size(); s++)
+            {
+                relachementArc(j, listeSommetsAdjacents[s], p_dureeCoutNiveau, &coutChemin, &sommetPrecedent);
+            }
+        }
+    }
+
+    for (size_t j = 0; j < m_unReseau.getNombreSommets(); j++)
+    {
+        std::vector<size_t> listeSommetsAdjacents = m_unReseau.listerSommetsAdjacents(j);
+        for (size_t s = 0; s < listeSommetsAdjacents.size(); s++)
+        {
+            if (p_dureeCoutNiveau == 3 && coutChemin[listeSommetsAdjacents[s]] > (coutChemin[j] + m_unReseau.getPonderationsArc(j, listeSommetsAdjacents[s]).ns))
+            {
+                return chemin;
+            }
+        }
+    }
+
+    if (sommetPrecedent[m_unReseau.getNumeroSommet(p_destination)] != NIL)
+    {
+        chemin = determinerChemin(m_unReseau.getNumeroSommet(p_origine), m_unReseau.getNumeroSommet(p_destination), p_dureeCoutNiveau, coutChemin, sommetPrecedent);
+    }
+    return chemin;
 }
 
 size_t ReseauAerien::minVecteur(std::vector<float> p_vecteur) const
@@ -230,5 +309,6 @@ bool ReseauAerien::sommetPresent(std::list<size_t> p_liste, size_t p_element) co
     }
     return false;
 }
+
 
 }//Fin du namespace

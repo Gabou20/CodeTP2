@@ -88,9 +88,9 @@ private:
 
     bool sommetPresent(std::list<size_t> p_liste, size_t p_element) const;
 
-	// Vous pouvez définir des constantes ici.
+	void relachementArc(size_t p_sommet1, size_t p_sommet2, int p_dureeCoutNiveau, std::vector<float>* p_coutChemin, std::vector<size_t>* p_sommetPrecedent) const;
 
-	//Vous pouvez ajoutez des méthodes privées si vous sentez leur nécessité
+	Chemin determinerChemin(size_t p_origine, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const;
 
 };
 
