@@ -131,6 +131,9 @@ void ReseauAerien::relachementArc(size_t p_sommet1, size_t p_sommet2, int p_dure
 Chemin ReseauAerien::determinerChemin(size_t p_origine, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const
 {
     Chemin chemin;
+    //chemin.dureeTotale = 0;
+    //chemin.coutTotal = 0;
+    //chemin.nsTotal = 0;
 
     chemin.reussi = true;
 
@@ -219,7 +222,7 @@ Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const
                     dc = 2;
                 }
 
-                ReseauAerien::relachementArc(sommetChoisi, j, dc, &coutChemin, &sommetPrecedent);
+                ReseauAerien::relachementArc(sommetChoisi, listeSommetsAdjacents[j], dc, &coutChemin, &sommetPrecedent);
             }
         }
 
@@ -246,7 +249,7 @@ Chemin ReseauAerien::rechercheCheminBellManFord(const std::string &p_origine, co
     Chemin chemin = Chemin();
     std::vector<float> coutChemin(m_unReseau.getNombreSommets(), std::numeric_limits<float>::max());
     std::vector<size_t> sommetPrecedent(m_unReseau.getNombreSommets(), NIL);
-    std::list<size_t> sommetsRestants;
+    //std::list<size_t> sommetsRestants;
 
     coutChemin[m_unReseau.getNumeroSommet(p_origine)] = 0;
 

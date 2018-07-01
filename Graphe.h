@@ -25,6 +25,7 @@ namespace TP2
 
 /**
  * \struct Ponderations
+ *
  * \brief Une struture utilisée pour stocker les pondérations utilisées sur les arcs
  */
 struct Ponderations
@@ -39,6 +40,7 @@ struct Ponderations
 
 /**
  * \struct Coordonnees
+ *
  * \brief Une structure utilisée pour stocker les coordonnées d'un sommet
  */
 struct Coordonnees
@@ -52,67 +54,46 @@ struct Coordonnees
 
 /**
  * \class Graphe
- * \brief Classe représentant un graphe
+ *
+ * \brief Classe représentant un graphe oriente
  */
 class Graphe
 {
 public:
 
-	// Constructeur
 	Graphe(size_t p_nbSommets = 10);
 
-	// Destructeur
 	~Graphe();
 
-	// Change la taille du graphe en utilisant un nombre de sommet = nouvelleTaille
 	void resize(size_t p_nouvelleTaille);
 
-	// Donne un nom et des coordonnées à un sommet en utlisant son numéro (indice dans le vector).
-	// Exception logic_error si sommet supérieur à nbSommets
 	void nommer(size_t p_sommet, const std::string& p_nom, float p_lt, float p_lg);
 
-	// Ajoute un arc au graphe
-	// Exception logic_error si source ou destination supérieur à nbSommets
-	// Exception logic_error si l'arc existe déjà dans le graphe
 	void ajouterArc(size_t p_source, size_t p_destination, float p_duree, float p_cout, int p_ns);
 
-	// Supprime un arc du graphe
-	// Exception logic_error si source ou destination supérieur à nbSommets
-	// Exception logic_error si l'arc n'existe pas dans le graphe
 	void enleverArc(size_t p_source, size_t p_destination);
 
-	// Vérifie si un arc existe
-	// Exception logic_error si source ou destination supérieur à nbSommets
 	bool arcExiste(size_t p_source, size_t p_destination) const;
 
-	// Retourne la liste de successeurs d'un sommmet
-	// Exception logic_error si sommet supérieur à nbSommets
 	std::vector<size_t> listerSommetsAdjacents(size_t p_sommet) const;
 
-	// Retourne le nom d'un sommet
-	// Exception logic_error si sommet supérieur à nbSommets
 	std::string getNomSommet(size_t p_sommet) const;
 
-	// Retourne le numéro d'un sommet
-	// Exception logic_error si nom n'existe pas dans le graphe
 	size_t getNumeroSommet(const std::string& p_nom) const;
 
-	// Retourne le nombre de sommet du graphe
 	int getNombreSommets() const;
 
-	// Retourne le nombre des arcs du graphe
 	int getNombreArcs() const;
 
-	// Retourne les pondérations se trouvant dans un arc (source -> destination)
-	// Exception logic_error si source ou destination supérieur à nbSommets
 	Ponderations getPonderationsArc(size_t p_source, size_t p_destination) const;
 
-	// Retourne les coordonnées d'un sommet
-	// Exception logic_error si sommet supérieur à nbSommets
 	Coordonnees getCoordonnesSommet(size_t p_sommet) const;
 
-	//Surcharge de l'opérateur de sortie.
-	//Ne touchez pas à cette fonction !
+    /**
+     * \fn friend std::ostream& operator<<(std::ostream& out, const Graphe& g)
+     *
+     * \brief Surcharge de l'operateur de sortie
+     */
 	friend std::ostream& operator<<(std::ostream& out, const Graphe& g)
 	{
 		out << "Le graphe contient " << g.m_nbSommets << " sommet(s) et "
@@ -136,14 +117,16 @@ public:
 		return out;
 	}
 
-    //Verifie l'existence des sommets
     void sommetsExistent(size_t p_source, size_t p_destination) const;
 
-    void sommetExiste(size_t p_sommet) const;
-	//Vous pouvez ajoutez d'autres méthodes publiques si vous sentez leur nécessité
+    void sommetExiste(size_t p_sommet, std::string message) const;
 
 private:
-
+    /**
+     * \struct Sommet
+     *
+     * \brief Une struture utilisée pour stocker les informations d'un sommet : son nom, ses coordonnees et son etat
+     */
 	struct Sommet
 	{
 		std::string m_nom;			// Le nom de la ville
@@ -157,6 +140,11 @@ private:
 
 	std::vector<Sommet> m_villes; /*!< Le vecteur des sommets */
 
+    /**
+     * \struct Arc
+     *
+     * \brief Une struture utilisée pour stocker les informations d'un arc : sa destination et ses ponderations
+     */
 	struct Arc
 	{
 		size_t m_destination;
