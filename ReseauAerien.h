@@ -24,7 +24,11 @@
 
 namespace TP2
 {
-
+/**
+ * \struct Chemin
+ *
+ * \brief Une struture utilisée pour stocker les informations d'un chemin : sa duree totale, son cout total, son niveau de securite total et s"il est reussi ou non.
+ */
 struct Chemin 
 {
    //listeVilles doit contenir la liste des villes formant le chemin
@@ -38,59 +42,51 @@ struct Chemin
    bool reussi;				// Un booléen qui vaut true si chemin a été trouvé, false sinon
 };
 
+/**
+ * \class ReseauAerien
+ *
+ * \brief Classe représentant un reseau aerien
+ */
 class ReseauAerien{
 
 public:
 
-	// Constructeur
 	ReseauAerien(std::string p_nomReseau, size_t p_nbVilles = 5);
 
-	// Destructeur
 	~ReseauAerien();
 
-	// Change la taille du réseau en utilisant un nombre de villes = nouvelleTaille
 	void resize(size_t p_nouvelleTaille);
 
-	//Surcharge de l'opérateur de sortie.
-	//Ne touchez pas à cette fonction !
+    /**
+     * \fn friend std::ostream& operator<<(std::ostream& out, const ReseauAerien& g)
+     *
+     * \brief Surcharge de l'operateur de sortie
+     */
 	friend std::ostream& operator<<(std::ostream& out, const ReseauAerien& g)
 	{
 		out << g.m_unReseau << std::endl;
 		return out;
 	}
 
-	// Charger un réseau à partir d'un fichier texte en entrée (voir format du fichier dans l'énoncé du Tp).
-	// Construit un réseau routier à partir d'une liste de villes ainsi que leurs liens.
-	// fichierEntree est ouvert corectement. 
-	// fichierEntree n'est pas fermé par la fonction.
-	// Exception logic_error si fichierEntree n'est pas ouvert correctement.
 	void chargerReseau(std::ifstream & p_fichierEntree);
 
-	// Retourne le plus court chemin selon l'algorithme de Dijkstra
-	// origine et destination font partie du graphe
-	// Exception std::logic_error si origine et/ou destination absent du réseau
 	Chemin rechercheCheminDijkstra(const std::string &p_origine, const std::string &p_destination, bool p_dureeCout) const;
 
-	// Retourne le plus court chemin selon l'algorithme Bellman-Ford
-	// origine et destination font partie du graphe
-	// 1 <= dureeCoutNiveau <= 3
-	// Exception std::logic_error si dureeCoutNiveau hors limite
-	// Exception std::logic_error si origine et/ou destination absent du réseau
 	Chemin rechercheCheminBellManFord(const std::string &p_origine, const std::string &p_destination, int p_dureeCoutNiveau) const;
 
-	//Vous pouvez ajoutez d'autres méthodes publiques si vous sentez leur nécessité
 
 private:
+
 	Graphe m_unReseau;			// Le type ReseauAerien est composé d'un graphe
 	std::string m_nomReseau;		// Le nom du reseau (exemple: Air Canada)
 
     size_t minVecteur(std::vector<float> p_vecteur) const;
 
-    bool sommetPresent(std::list<size_t> p_liste, size_t p_element) const;
+    bool sommetPresent(std::list<size_t> p_liste, size_t p_sommet) const;
 
 	void relachementArc(size_t p_sommet1, size_t p_sommet2, int p_dureeCoutNiveau, std::vector<float>* p_coutChemin, std::vector<size_t>* p_sommetPrecedent) const;
 
-	Chemin determinerChemin(size_t p_origine, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const;
+	Chemin determinerChemin(size_t p_source, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const;
 
 };
 

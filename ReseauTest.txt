@@ -1,5 +1,5 @@
 Reseau Aerien: Air Canada
-17 villes
+22 villes
 Liste des villes:
 Quebec
 46.80 -71.24
@@ -35,6 +35,16 @@ New_York
 40.71 -74.01
 Singapour
 1.29 103.85
+Melbourne
+49.06 47.01
+Cairns
+6.78 41.00
+Brisbane
+11.18 30.45
+Sydney
+7.52 33.47
+Beijing
+15.12 26.63
 Liste des trajets:
 Quebec
 Montreal
@@ -101,7 +111,64 @@ Detroit
 1.03 800.43 -3
 Toronto
 Vancouver
-3.00 3.5 5
+3.00 334.50 5
 Vancouver
 Chicago
-4.67 3.0 4
+4.67 311.03 4
+Vancouver
+Brisbane
+11 652.25 2
+Brisbane
+Cairns
+1 254.65 -2
+Cairns
+Melbourne
+1 223.56 -1
+Brisbane
+Melbourne
+1.5 343.16 0
+Brisbane
+Sydney
+1 395.45 1
+Sydney
+Melbourne
+1 182.45 -3
+Sydney
+Toronto
+14 999.34 5
+Chicago
+Melbourne
+12 1104.23 3
+New_York
+Sydney
+9 1050.56 3
+Ottawa
+Toronto
+0.5 154.67 1
+Melbourne
+Tokyo
+4 432.56 2
+Melbourne
+Bujumbura
+6.3 762.67 -3
+Paris
+Bogota
+4.23 820.56 -1
+Toronto
+Detroit
+2.73 405.34 3
+Paris
+Bruxelles
+0.1 87.87 1
+Toronto
+Sydney
+14 1500.87 5
+Montreal
+Beijing
+13.45 671.45 4
+Quebec
+Beijing
+13.01 1000.34 3
+Toronto
+Beijing
+12.43 564.76 4

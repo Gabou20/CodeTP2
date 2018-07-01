@@ -14,15 +14,15 @@
 #include <fstream>
 #include <stack>
 #include <limits>
-//vous pouvez inclure d'autres librairies si c'est nécessaire
 
 namespace TP2
 {
 
-// Méthode fournie
+
 /**
  * \fn void ReseauAerien::chargerReseau(std::ifstream & fichierEntree)
- * \param[in] le fichier contenant l'information sur le réseau
+ *
+ * \param[in] fichierEntree le fichier contenant l'information sur le réseau
  */
 void ReseauAerien::chargerReseau(std::ifstream & fichierEntree)
 {
@@ -84,22 +84,55 @@ void ReseauAerien::chargerReseau(std::ifstream & fichierEntree)
 	}
 }
 
-// Constructeur
+
+/**
+ * \fn ReseauAerien::ReseauAerien(std::string p_nomReseau, size_t p_nbVilles)
+ *
+ * \brief Constructeur de la classe ReseauAerien
+ *
+ * \param[in] p_nomReseau le nom du reseau
+ * \param[in] p_nbVilles le nombre de villes du reseau, valeur par defaut de 5
+ */
 ReseauAerien::ReseauAerien(std::string p_nomReseau, size_t p_nbVilles) :
     m_nomReseau(p_nomReseau),
-    m_unReseau(Graphe(p_nbVilles))
+    m_unReseau(p_nbVilles)
 {}
 
-// Destructeur
+
+/**
+ * \fn ReseauAerien::~ReseauAerien()
+ *
+ * \brief Destructeur de la classe ReseauAerien
+ */
 ReseauAerien::~ReseauAerien()
 {}
 
-// Change la taille du réseau en utilisant un nombre de villes = nouvelleTaille
+
+/**
+ * \fn void ReseauAerien::resize(size_t p_nouvelleTaille)
+ *
+ * \brief Change la taille du réseau en utilisant un nombre de villes = p_nouvelleTaille
+ *
+ * \param[in] p_nouvelleTaille le nouveau nombre de sommets du reseau
+ */
 void ReseauAerien::resize(size_t p_nouvelleTaille)
 {
     m_unReseau.resize(p_nouvelleTaille);
 }
 
+/**
+ * \fn void ReseauAerien::relachementArc(size_t p_sommet1, size_t p_sommet2, int p_dureeCoutNiveau, std::vector<float>* p_coutChemin, std::vector<size_t>* p_sommetPrecedent) const
+ *
+ * \brief Si un chemin plus court partant de la source vers p_sommet2 est trouve, la valeur de ce sommet dans coutChemin est modifiee et le predecesseur de p_sommet2 devient p_sommet1
+ *
+ * \param[in] p_sommet1 Le potentiel predecesseur de p_sommet2
+ * \param[in] p_sommet2 Le sommet qui sera possiblement relache
+ * \param[in] p_dureeCoutNiveau L'indicateur de la donnee utilisee dans le calcul du plus court chemin
+ * \param[in] p_coutChemin Le vecteur des couts du chemin pour aller de la source vers chaque sommet
+ * \param[in] p_sommetPrecedent Le vecteur des predecesseurs de chaque sommet dans le plus court chemin
+ *
+ * \exception logic_error si le parametre dureeCoutNiveau n'est pas dans les choix, soit 1, 2 et 3
+ */
 void ReseauAerien::relachementArc(size_t p_sommet1, size_t p_sommet2, int p_dureeCoutNiveau, std::vector<float>* p_coutChemin, std::vector<size_t>* p_sommetPrecedent) const
 {
     float coutPotentiel;
@@ -128,7 +161,22 @@ void ReseauAerien::relachementArc(size_t p_sommet1, size_t p_sommet2, int p_dure
     }
 }
 
-Chemin ReseauAerien::determinerChemin(size_t p_origine, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const
+/**
+ * \fn Chemin ReseauAerien::determinerChemin(size_t p_origine, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const
+ *
+ * \brief Lorsque l'algorithme de recherche du plus court chemin est termine, cette fonction
+ *
+ * \pre La fonction appelante doit s'assurer qu'un chemin a bien ete trouve entre la source et la destination
+ *
+ * \param[in] p_source Le sommet de depart du chemin
+ * \param[in] p_destination Le sommet d'arrivee du chemin
+ * \param[in] p_dureeCoutNiveau L'indicateur de la donnee utilisee dans le calcul du plus court chemin
+ * \param[in] p_coutChemin Le vecteur des couts du chemin pour aller de la source vers chaque sommet
+ * \param[in] p_sommetPrecedent Le vecteur des predecesseurs de chaque sommet dans le plus court chemin
+ *
+ * \return Le chemin contenant les bonnes informations : le booleen confirmant le succes de l'algorithme de recherche du plus court chemin, la liste des villes parcourues (dans l'ordre) et le cout, la duree ou le niveau de securite total, selon le cas.
+ */
+Chemin ReseauAerien::determinerChemin(size_t p_source, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const
 {
     Chemin chemin;
     //chemin.dureeTotale = 0;
@@ -159,7 +207,7 @@ Chemin ReseauAerien::determinerChemin(size_t p_origine, size_t p_destination, in
         predecesseur = p_sommetPrecedent[predecesseur];
         villesChemin.push(m_unReseau.getNomSommet(predecesseur));
     }
-    while (predecesseur != p_origine);
+    while (predecesseur != p_source);
 
     do
     {
@@ -171,9 +219,20 @@ Chemin ReseauAerien::determinerChemin(size_t p_origine, size_t p_destination, in
     return chemin;
 }
 
-// Retourne le plus court chemin selon l'algorithme de Dijkstra
-// origine et destination font partie du graphe
-// Exception std::logic_error si origine et/ou destination absent du réseau
+
+/**
+ * \fn Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const std::string &p_destination, bool p_dureeCout) const
+ *
+ * \brief Algorithme de Dijkstra afin de trouver le plus court chemin entre deux sommets dans un graphe oriente
+ *
+ * \param[in] p_origine Le sommet de depart du chemin
+ * \param[in] p_destination Le sommet d'arrivee du chemin
+ * \param[in] p_dureeCout L'indicateur de la donnee utilisee dans le calcul du plus court chemin
+ *
+ * \exception logic_error si l'un des sommets donnes en parametre n'existe pas
+ *
+ * \return Le chemin contenant les bonnes informations : le booleen confirmant le succes de l'algorithme de recherche du plus court chemin, la liste des villes parcourues (dans l'ordre) et le cout ou la duree total, selon le cas.
+ */
 Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const std::string &p_destination, bool p_dureeCout) const
 {
     m_unReseau.sommetsExistent(m_unReseau.getNumeroSommet(p_origine), m_unReseau.getNumeroSommet(p_destination));
@@ -232,11 +291,21 @@ Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const
     return chemin;
 }
 
-// Retourne le plus court chemin selon l'algorithme Bellman-Ford
-// origine et destination font partie du graphe
-// 1 <= dureeCoutNiveau <= 3
-// Exception std::logic_error si dureeCoutNiveau hors limite
-// Exception std::logic_error si origine et/ou destination absent du réseau
+
+/**
+ * \fn Chemin ReseauAerien::rechercheCheminBellManFord(const std::string &p_origine, const std::string &p_destination, int p_dureeCoutNiveau) const
+ *
+ * \brief Algorithme de Bellman-Ford afin de trouver le plus court chemin entre deux sommets dans un graphe oriente
+ *
+ * \param[in] p_origine Le sommet de depart du chemin
+ * \param[in] p_destination Le sommet d'arrivee du chemin
+ * \param[in] p_dureeCout L'indicateur de la donnee utilisee dans le calcul du plus court chemin
+ *
+ * \exception logic_error si l'un des sommets donnes en parametre n'existe pas
+ * \exception logic_error si p_dureeCoutNiveau n'est pas 1, 2 ou 3
+ *
+ * \return Le chemin contenant les bonnes informations : le booleen confirmant le succes de l'algorithme de recherche du plus court chemin, la liste des villes parcourues (dans l'ordre) et le cout, la duree ou le niveau de securite total, selon le cas.
+ */
 Chemin ReseauAerien::rechercheCheminBellManFord(const std::string &p_origine, const std::string &p_destination, int p_dureeCoutNiveau) const
 {
     m_unReseau.sommetsExistent(m_unReseau.getNumeroSommet(p_origine), m_unReseau.getNumeroSommet(p_destination));
@@ -284,6 +353,15 @@ Chemin ReseauAerien::rechercheCheminBellManFord(const std::string &p_origine, co
     return chemin;
 }
 
+/**
+ * \fn size_t ReseauAerien::minVecteur(std::vector<float> p_vecteur) const
+ *
+ * \brief Trouve l'indice du plus petit element d'un vecteur de reels
+ *
+ * \param[in] p_vecteur Le vecteur d'entiers dans lequel on cherche un minimum
+ *
+ * \return L'indice du plus petit element du vecteur p_vecteur
+ */
 size_t ReseauAerien::minVecteur(std::vector<float> p_vecteur) const
 {
     float min = std::numeric_limits<float>::max();
@@ -301,11 +379,22 @@ size_t ReseauAerien::minVecteur(std::vector<float> p_vecteur) const
     return minIndex;
 }
 
-bool ReseauAerien::sommetPresent(std::list<size_t> p_liste, size_t p_element) const
+
+/**
+ * \fn bool ReseauAerien::sommetPresent(std::list<size_t> p_liste, size_t p_sommet) const
+ *
+ * \brief Verifie si un sommet est present dans une liste
+ *
+ * \param[in] p_liste La liste de size_t dans laquelle il faut chercher le sommet
+ * \param[in] p_sommet Le sommet a chercher dans la liste
+ *
+ * \return true si le sommet a ete trouve, false sinon
+ */
+bool ReseauAerien::sommetPresent(std::list<size_t> p_liste, size_t p_sommet) const
 {
     for (std::list<size_t>::const_iterator it = p_liste.begin(); it != p_liste.end(); ++it)
     {
-        if (*it == p_element)
+        if (*it == p_sommet)
         {
             return true;
         }

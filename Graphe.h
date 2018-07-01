@@ -119,8 +119,6 @@ public:
 
     void sommetsExistent(size_t p_source, size_t p_destination) const;
 
-    void sommetExiste(size_t p_sommet, std::string message) const;
-
 private:
     /**
      * \struct Sommet
@@ -158,7 +156,7 @@ private:
 	size_t m_nbSommets;					// Le nombre de sommets dans le graphe
 	size_t m_nbArcs;					// Le nombre des arcs dans le graphe
 
-
+    void sommetExiste(size_t p_sommet, std::string message) const;
 
 };
 
