@@ -1,7 +1,7 @@
 /**
  * \file ReseauAerien.cpp
  * \brief Implémentattion de la classe ReseauAerien.
- * \author Étudiant(e)
+ * \author Gabrielle Martin-Fortier
  * \version 0.1
  * \date Juin-Juillet 2018
  *
@@ -131,7 +131,7 @@ void ReseauAerien::resize(size_t p_nouvelleTaille)
  * \param[in] p_coutChemin Le vecteur des couts du chemin pour aller de la source vers chaque sommet
  * \param[in] p_sommetPrecedent Le vecteur des predecesseurs de chaque sommet dans le plus court chemin
  *
- * \exception logic_error si le parametre dureeCoutNiveau n'est pas dans les choix, soit 1, 2 et 3
+ * \exception logic_error si le parametre dureeCoutNiveau n'est pas dans les choix, soit 1, 2 ou 3
  */
 void ReseauAerien::relachementArc(size_t p_sommet1, size_t p_sommet2, int p_dureeCoutNiveau, std::vector<float>* p_coutChemin, std::vector<size_t>* p_sommetPrecedent) const
 {
@@ -179,9 +179,11 @@ void ReseauAerien::relachementArc(size_t p_sommet1, size_t p_sommet2, int p_dure
 Chemin ReseauAerien::determinerChemin(size_t p_source, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const
 {
     Chemin chemin;
-    //chemin.dureeTotale = 0;
-    //chemin.coutTotal = 0;
-    //chemin.nsTotal = 0;
+
+    if (p_sommetPrecedent[p_destination] == NIL)
+    {
+        return chemin;
+    }
 
     chemin.reussi = true;
 
@@ -195,7 +197,7 @@ Chemin ReseauAerien::determinerChemin(size_t p_source, size_t p_destination, int
     }
     else
     {
-        chemin.nsTotal = p_coutChemin[p_destination];
+        chemin.nsTotal = (int) p_coutChemin[p_destination];
     }
 
     std::stack<std::string> villesChemin;
@@ -247,7 +249,7 @@ Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const
     std::vector<size_t> sommetPrecedent(m_unReseau.getNombreSommets(), NIL);
     std::list<size_t> sommetsRestants;
 
-    coutChemin[m_unReseau.getNumeroSommet(p_origine)] = 0;
+    coutChemin[m_unReseau.getNumeroSommet(p_origine)] = 0; //Cout de l'origine = 0
 
     for (size_t i = 0; i < m_unReseau.getNombreSommets(); i++)
     {
@@ -266,14 +268,15 @@ Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const
             {
                 dc = 2;
             }
+
             chemin = determinerChemin(m_unReseau.getNumeroSommet(p_origine), m_unReseau.getNumeroSommet(p_destination), dc, coutChemin, sommetPrecedent);
             break;
         }
-        std::vector<size_t> listeSommetsAdjacents = m_unReseau.listerSommetsAdjacents(sommetChoisi);
 
+        std::vector<size_t> listeSommetsAdjacents = m_unReseau.listerSommetsAdjacents(sommetChoisi);
         for (size_t j = 0; j < listeSommetsAdjacents.size(); j++)
         {
-            if (ReseauAerien::sommetPresent(sommetsRestants, listeSommetsAdjacents[j]))
+            if (ReseauAerien::sommetPresent(sommetsRestants, listeSommetsAdjacents[j])) //Si le sommet adjacent courant n'est pas encore parcouru par l'algorithme, il est "relache"
             {
                 int dc = 1;
                 if (!p_dureeCout)
@@ -287,7 +290,6 @@ Chemin ReseauAerien::rechercheCheminDijkstra(const std::string &p_origine, const
 
         coutChemin[sommetChoisi] = std::numeric_limits<float>::max(); //Pour eviter que ce sommet ne soit choisi de nouveau
     }
-
     return chemin;
 }
 
@@ -318,9 +320,8 @@ Chemin ReseauAerien::rechercheCheminBellManFord(const std::string &p_origine, co
     Chemin chemin = Chemin();
     std::vector<float> coutChemin(m_unReseau.getNombreSommets(), std::numeric_limits<float>::max());
     std::vector<size_t> sommetPrecedent(m_unReseau.getNombreSommets(), NIL);
-    //std::list<size_t> sommetsRestants;
 
-    coutChemin[m_unReseau.getNumeroSommet(p_origine)] = 0;
+    coutChemin[m_unReseau.getNumeroSommet(p_origine)] = 0; //Cout de l'origine a 0
 
     for (int i = 0; i < m_unReseau.getNombreSommets() - 1; i++)
     {
@@ -334,22 +335,16 @@ Chemin ReseauAerien::rechercheCheminBellManFord(const std::string &p_origine, co
         }
     }
 
-    for (size_t j = 0; j < m_unReseau.getNombreSommets(); j++)
+    if (p_dureeCoutNiveau == 3) //On verifie la presence de cycles negatifs seulement pour le niveau de securite puisque les autres n'ont que des valeurs positives
     {
-        std::vector<size_t> listeSommetsAdjacents = m_unReseau.listerSommetsAdjacents(j);
-        for (size_t s = 0; s < listeSommetsAdjacents.size(); s++)
+        if (verifierCycleNegatif(coutChemin))
         {
-            if (p_dureeCoutNiveau == 3 && coutChemin[listeSommetsAdjacents[s]] > (coutChemin[j] + m_unReseau.getPonderationsArc(j, listeSommetsAdjacents[s]).ns))
-            {
-                return chemin;
-            }
+            return chemin;
         }
     }
 
-    if (sommetPrecedent[m_unReseau.getNumeroSommet(p_destination)] != NIL)
-    {
-        chemin = determinerChemin(m_unReseau.getNumeroSommet(p_origine), m_unReseau.getNumeroSommet(p_destination), p_dureeCoutNiveau, coutChemin, sommetPrecedent);
-    }
+    chemin = determinerChemin(m_unReseau.getNumeroSommet(p_origine), m_unReseau.getNumeroSommet(p_destination), p_dureeCoutNiveau, coutChemin, sommetPrecedent);
+
     return chemin;
 }
 
@@ -397,6 +392,31 @@ bool ReseauAerien::sommetPresent(std::list<size_t> p_liste, size_t p_sommet) con
         if (*it == p_sommet)
         {
             return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * \fn bool ReseauAerien::verifierCycleNegatif(const std::vector<float> &p_coutChemin) const
+ *
+ * \brief Verifie si un reseau aerien contient un cycle negatif
+ *
+ * \param[in] p_coutChemin la liste des couts des chemins pour aller de l'origine a chaque sommet
+ *
+ * \return true s'il existe un cycle de valeur negative, false sinon
+ */
+bool ReseauAerien::verifierCycleNegatif(const std::vector<float> &p_coutChemin) const
+{
+    for (size_t j = 0; j < m_unReseau.getNombreSommets(); j++)
+    {
+        std::vector<size_t> listeSommetsAdjacents = m_unReseau.listerSommetsAdjacents(j);
+        for (size_t s = 0; s < listeSommetsAdjacents.size(); s++)
+        {
+            if (p_coutChemin[listeSommetsAdjacents[s]] > (p_coutChemin[j] + m_unReseau.getPonderationsArc(j, listeSommetsAdjacents[s]).ns))
+            {
+                return true;
+            }
         }
     }
     return false;

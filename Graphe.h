@@ -134,6 +134,11 @@ private:
 		Sommet() : m_nom(""), m_coord(Coordonnees(0,0)), m_etat(false) {}
 
 		Sommet(std::string nv, Coordonnees cv, bool ev) : m_nom(nv), m_coord(cv), m_etat(ev) {}
+
+        void setNom(std::string p_nom);
+
+        void setCoordonnees(Coordonnees p_coord);
+
 	};
 
 	std::vector<Sommet> m_villes; /*!< Le vecteur des sommets */

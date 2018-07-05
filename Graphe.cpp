@@ -1,7 +1,7 @@
 /**
 * \file Graphe.cpp
 * \brief Implémentation d'un graphe orienté.
-* \author Étudiant(e)
+* \author Gabrielle Martin-Fortier
 * \version 0.5
 * \date Juin-Juillet 2018
 *
@@ -27,12 +27,15 @@ Graphe::Graphe(size_t p_nbSommets) :
     m_listesAdj(),
     m_villes()
 {
-    //m_villes.resize(p_nbSommets);
+    m_villes.resize(p_nbSommets);
+    m_listesAdj.resize(p_nbSommets);
+    /*
     for (int i = 0; i < p_nbSommets; i++)
     {
         m_villes.push_back(Sommet());
         m_listesAdj.push_back(std::list<Arc>());
     }
+     */
 }
 
 /**
@@ -45,26 +48,15 @@ Graphe::~Graphe() {}
 /**
  * \fn void Graphe::resize(size_t p_nouvelleTaille)
  *
- * \brief Si la nouvelle taille est plus grande que la taille actuelle, change la taille du Graphe en ajoutant des sommets vides
+ * \brief Change la taille du Graphe en ajoutant des sommets vides ou en tronquant la liste
  *
  * \param[in] p_nouvelleTaille Le nouveau nombre de sommets dans le graphe
  */
 void Graphe::resize(size_t p_nouvelleTaille)
 {
-    //possiblement utiliser resize de la stl
-    if (p_nouvelleTaille > m_nbSommets)
-    {
-        for (int i = 0; i < (p_nouvelleTaille - m_nbSommets); i++)
-        {
-            m_villes.push_back(Sommet());
-            m_listesAdj.push_back(std::list<Arc>());
-        }
-    }
-
-    //m_villes.resize(p_nouvelleTaille);
+    m_villes.resize(p_nouvelleTaille);
+    m_listesAdj.resize(p_nouvelleTaille);
     m_nbSommets = p_nouvelleTaille;
-
-    //ici il va falloir ajuster les listes si la fonction permet de reduire le nombre de sommets
 }
 
 /**
@@ -83,8 +75,8 @@ void Graphe::nommer(size_t p_sommet, const std::string& p_nom, float p_lt, float
 {
     sommetExiste(p_sommet, "Tentative de nommer un sommet inexistant");
 
-    m_villes[p_sommet].m_nom = p_nom;
-    m_villes[p_sommet].m_coord = Coordonnees(p_lt, p_lg);
+    m_villes[p_sommet].setNom(p_nom);
+    m_villes[p_sommet].setCoordonnees(Coordonnees(p_lt, p_lg));
 }
 
 
@@ -113,9 +105,7 @@ void Graphe::ajouterArc(size_t p_source, size_t p_destination, float p_duree, fl
 
     m_nbArcs += 1;
 
-    Arc nouvelArc(p_destination, Ponderations(p_duree, p_cout, p_ns));
-
-    m_listesAdj[p_source].push_back(nouvelArc);
+    m_listesAdj[p_source].push_back(Arc(p_destination, Ponderations(p_duree, p_cout, p_ns)));
 }
 
 
@@ -142,6 +132,7 @@ void Graphe::enleverArc(size_t p_source, size_t p_destination)
     {
         if (it -> m_destination == p_destination)
         {
+            m_nbArcs -= 1;
             m_listesAdj[p_source].erase(it);
             break;
         }
@@ -195,6 +186,7 @@ std::vector<size_t> Graphe::listerSommetsAdjacents(size_t p_sommet) const
     sommetExiste(p_sommet, "Liste d'adjacence demandee pour un sommet inexistant");
 
     std::vector<size_t> destinations;
+
 
     for (std::list<Arc>::const_iterator it = m_listesAdj[p_sommet].begin(); it != m_listesAdj[p_sommet].end(); ++it)
     {
@@ -362,6 +354,16 @@ void Graphe::sommetExiste(size_t p_sommet, std::string p_message) const
     {
         throw std::logic_error(p_message);
     }
+}
+
+void Graphe::Sommet::setNom(std::string p_nom)
+{
+    m_nom = p_nom;
+}
+
+void Graphe::Sommet::setCoordonnees(Coordonnees p_coord)
+{
+    m_coord = p_coord;
 }
 
 }//Fin du namespace

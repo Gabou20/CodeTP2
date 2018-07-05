@@ -88,6 +88,8 @@ private:
 
 	Chemin determinerChemin(size_t p_source, size_t p_destination, int p_dureeCoutNiveau, std::vector<float>& p_coutChemin, std::vector<size_t>& p_sommetPrecedent) const;
 
+    bool verifierCycleNegatif(const std::vector<float> &p_coutChemin) const;
+
 };
 
 }//Fin du namespace

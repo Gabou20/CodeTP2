@@ -169,6 +169,3 @@ Beijing
 Quebec
 Beijing
 13.01 1000.34 3
-Toronto
-Beijing
-12.43 564.76 4

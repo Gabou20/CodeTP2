@@ -18,16 +18,6 @@ using namespace TP2;
 
 int main()
 {
-	//Graphe g;
-	//g.nommer(2, "Montreal", 1, 2);
-	//g.nommer(3, "Quebec", 2, 3);
-	//g.ajouterArc(2, 3, 1, 300, 3);
-	//g.ajouterArc(3,2,1,400,2);
-	//cout << g.getNomSommet(3) << "\n";
-	//cout << g.arcExiste(2,3) << "\n";
-	//cout << g.listerSommetsAdjacents(2).front();
-	//cout << g;
-
 
 	int nb = 1;						//Choix de l'utilisateur dans le menu initialisé à 1.
 	string villeDepart;				//Chaîne de caractères représentant la ville de départ.
@@ -189,6 +179,7 @@ int main()
 	}
 
 	cout << "***Merci et au revoir !***" << endl;
+
 	return 0;
 
 }
